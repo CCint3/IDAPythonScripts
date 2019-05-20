@@ -1,0 +1,266 @@
+
+#
+# 在运行 IDA 后，它开始加载 ${IDAHOME}/plugins 下所有的插件。
+# 每个插件都是一个 动态链接库
+#
+# *.plw 用于 idaq 即 "IDA Pro 6.8 x86"
+# *.p64 用于 idaq64 即 "IDA Pro 6.8 x64"
+#
+# *.dll 用于 ida 即 "IDA Pro 7.0 x86"
+# *64.dll 用于 ida64 即 "IDA Pro 7.0 x64"
+#
+#
+# IDAPython
+# IDAPython 是一个开源的可以让用户在 IDA Pro 中执行 Python 脚本的 IDA 插件。
+# 相关链接:
+# Source Code: https://github.com/idapython
+# Source Code: https://code.google.com/archive/p/idapython/
+#       Forum: http://groups.google.com/group/idapython
+#    Document: https://www.hex-rays.com/products/ida/support/idapython_docs/
+# "IDA Pro 6.8" 中 IDAPython 插件在 ${IDAHOME}/plugins/python.plw 和 ${IDAHOME}/plugins/python.p64
+# "IDA Pro 7.0" 中 IDAPython 插件在 ${IDAHOME}/plugins/python.dll 和 ${IDAHOME}/plugins/python64.dll
+#
+#
+# IDAPython 需要一个外部 Python 才能够被正确加载
+# GitHub 上的源码说明需要 Python2.7 或 Python2.6
+# 值得注意的是：
+#   [*] 在 Windows 上 "IDA Pro 6.8" 的 x86 和 x64 分别使用 Python x86 和 Python x64, 而 "IDA Pro 7.0" 的 x86 和 x64 都使用 Python x64
+#   [*] 在 Windows 上 IDAPython 将在注册表中搜寻 Python 的路径，如果不能被找到，那么 IDAPython 将加载失败。
+#   [*] "IDA Pro 6.8 x86" 搜寻以下注册表路径:
+#       HKLM\SOFTWARE\Wow6432Node\Python\PythonCore\2.7\InstallPath
+#       HKLM\SOFTWARE\Wow6432Node\Python\PythonCore\2.7\InstallPath\InstallGroup
+#       HKLM\SOFTWARE\Wow6432Node\Python\PythonCore\2.7\PythonPath
+#
+#   [*] "IDA Pro 6.8 x64" "IDA Pro 7.0 x86" "IDA Pro 7.0 x64" 搜寻以下注册表路径:
+#       HKLM\SOFTWARE\Python\PythonCore\2.7\InstallPath
+#       HKLM\SOFTWARE\Python\PythonCore\2.7\InstallPath\InstallGroup
+#       HKLM\SOFTWARE\Python\PythonCore\2.7\PythonPath
+#
+# 为了更加方便的运行 IDAPython 你可以使用以下 batch 脚本用于设置Python路径并启动 IDA Pro
+#
+# # # # # # # # # # # # # # # # # # # # # # #
+### @ECHO OFF
+### REM remove Python 32-bit and 64-bit path from REGEDIT
+### REG DELETE HKLM\SOFTWARE\Python /f 1>NUL 2>&1
+### REG DELETE HKLM\SOFTWARE\Wow6432Node\Python /f 1>NUL 2>&1
+### 
+### REM set Python path env for you
+### SET PYTHON_PATH = %TOOLS%\.SymLinkd\IDAPython_amd64
+### 
+### REM add new Python path to REGEDIT
+### REG ADD HKLM\SOFTWARE\Python\PythonCore\2.7\InstallPath /ve /t REG_SZ /d "Python Path" 1>NUL 2>&1
+### REG ADD HKLM\SOFTWARE\Python\PythonCore\2.7\InstallPath\InstallGroup /ve /t REG_SZ /d "Python 2.7" 1>NUL 2>&1
+### REG ADD HKLM\SOFTWARE\Python\PythonCore\2.7\PythonPath /ve /t REG_SZ /d "%PYTHON_PATH%\Lib;%PYTHON_PATH%\DLLs;%PYTHON_PATH%\Lib\lib-tk" 1>NUL 2>&1
+### REM start ida64.exe or idaq64.exe
+### START .\ida64.exe %*
+# # # # # # # # # # # # # # # # # # # # # # #
+
+# IDAPython 的主要文件
+# idaapi.py 封装了所有的 IDA SDK
+# idautils.py 对 idaapi.py 再次封装，提供了一些简易功能
+# idc.py 提供了 IDC 脚本的函数
+#
+# 相关Bug:
+# https://bbs.pediy.com/thread-229574.htm
+#
+#
+
+
+
+# 以上内容纯属瞎扯
+
+# 修改 IDA 虚拟的 ARM T标志位，相当于 alt+G 快捷键。
+#SetRegEx(here(), "T", 1, 1)
+
+# 获取IDA View窗口光标的位置
+#idc.ScreenEA()
+#idc.here()
+#idaapi.get_screen_ea()
+
+# 最小最大位置
+#idc.MinEA()
+#idc.MaxEA()
+
+# 获取汇编指令(包括注释)
+#idc.GetDisasm(here())
+
+# 打开function窗口让用户选择一个函数
+#choose_func("title")
+
+# 获取当前汇编指令的下一个EA
+#idc.NextHead(here())
+#idc.PrevHead(here())
+
+# 获取下一个地址
+#idc.NextAddr(here())
+#idc.PrevAddr(here())
+
+# 获取操作数，从0开始。(返回的操作数与窗口中显示的保持一致，例如有重命名局部变量或参数)
+#idc.GetOpnd(here() ,0)
+#idc.get_operand_type(here(), 0)
+#idc.get_operand_value(here(), 0)
+
+# 获取反编译伪代码
+#idaapi.decompile(here())
+
+# 反编译函数入口
+"%08X" %idaapi.decompile(here()).entry_ea
+
+#idaapi.decompile(here()).get_eamap().items()
+
+# 获取汇编指令助记符
+#idc.GetMnem(here())
+
+# 校验地址是否有效
+#if idc.BADADDR != here(): print "valid address"
+
+# 获取当前段名称
+#print idc.SegName(here())
+
+# 获取下一个段
+#print hex(idc.NextSeg(here()))
+
+# 使用段名称获取段
+#print idc.SegByName(idc.SegName(here()))
+
+# 获取当前函数名称
+#print idc.GetFunctionName(here())
+
+# 获取当前函数，返回 idaapi.func_t 类型
+#print type(idaapi.get_func(here())), hex(idaapi.get_func(here()).startEA), hex(idaapi.get_func(here()).endEA)
+
+# 获取下一个函数EA
+#print type(idc.NextFunction(here()))
+
+# 获取上一个函数EA
+#print type(idc.PrevFunction(here()))
+
+# 获取当前函数的起始EA
+print "0x%08X" idc.GetFunctionAttr(here(), FUNCATTR_START)
+
+# 获取当前函数的结束EA
+print "0x%08X" %idc.GetFunctionAttr(here(), FUNCATTR_END)
+
+# 遍历当前函数的所有EA
+for test in FuncItems(here()):
+  print "0x%08X" %test
+
+# 获取函数标志
+#flags = GetFunctionFlags(here())
+# 以下宏定义在 funcs.hpp 中。详见：https://www.hex-rays.com/products/ida/support/sdkdoc/group___f_u_n_c__.html
+# FUNC_NORET     = 1 #这个标志用来标识一个函数没有执行一个返回指令。
+# FUNC_FAR       = 2 #这个标志很少出现，除非软件使用分段内存。
+# FUNC_LIB       = 4 #库函数 或 被签名应用的函数 此标志用于查找库代码。识别库代码非常有用，因为它是在执行分析时通常可以忽略的代码。
+# FUNC_STATICDEF = 8 # 静态函数，此标志用于标识作为静态函数编译的函数。在 C 函数中默认是全局的。如果作者定义了一个函数为静态只能访问内部文件等功能。在有限的方式下，这可以用来帮助理解源代码是如何构造的。
+# FUNC_FRAME   = 0x10 # 函数使用了frame pointer(BP)
+# FUNC_USERFAR = 0x20 #这个标志是罕见的，具有非常小的文件。
+# FUNC_HIDDEN  = 0x40 #函数带 FUNC_HIDDEN 标志意味着他们是隐藏的将需要扩展到视图。
+# FUNC_THUNK   = 0x80 #这标志标识函数是 thunk 函数。一个简单的功能是跳到另一个函数。
+# FUNC_BOTTOMBP      = 0x100 #BP指向栈框架的底部。
+# FUNC_NORET_PENDING = 0x200 #必须执行功能“非返回”分析。
+# FUNC_SP_READY      = 0x400 #已进行SP分析。 如果启用此标志，则不应再修改堆栈更改点。目前，此分析仅针对PC执行
+# FUNC_FUZZY_SP      = 0x800 #函数以无法追踪的方式改变SP。例如: and esp, 0FFFFFFF0h
+# FUNC_PROLOG_OK = 0x1000 #已经进行了Prolog分析。 通过最后的SP分析
+# FUNC_PURGED_OK = 0x4000 #'argsize'字段已经过验证。 如果该位清零且'argsize'为0，那么我们不知道从栈中删除的实际字节数。该位由处理器模块处理。
+# FUNC_TAIL      = 0x8000 #这是一个函数尾。其他位必须清零（FUNC_HIDDEN除外）。
+
+# 获取所有库函数
+#for func in idautils.Functions():
+#  flags = idc.GetFunctionFlags(func)
+#  print flags
+#  if flags & FUNC_LIB == FUNC_LIB:
+#    print "%s: %s" %(hex(func), idc.GetFunctionName(func))
+
+# 获取指令操作类型，定义详见: https://www.hex-rays.com/products/ida/support/sdkdoc/group__o__.html
+
+# 遍历所有函数 idautils.Functions() 返回函数ea
+#for func in idautils.Functions():
+#  print hex(func), idc.GetFunctionName(func)
+
+# 遍历所有段
+#for seg in idautils.Segments():
+#  print "SegName: %s, SegStart: %s, SegEnd: %s" %(idc.SegName(seg), hex(idc.SegStart(seg)), hex(idc.SegEnd(seg)))
+
+# 查询代码引用: 调用了哪些
+for ref in CodeRefsFrom(here(), 1):
+  print "0x%08X" %(ref)
+
+# 查询代码引用: 被谁调用了
+#for ref in CodeRefsTo(here(), 1):
+#  print ref
+
+# 查询引用: 调用了谁 或者 使用了哪个变量
+for xref in XrefsFrom(here(), 0):
+  print xref.type, XrefTypeName(xref.type), 'from', hex(xref.frm), 'to', hex(xref.to)
+
+# 查询引用: 被谁调用了
+#for xref in XrefsTo(here(), 0):
+#  print xref.type, XrefTypeName(xref.type), 'from', hex(xref.frm), 'to', hex(xref.to)
+
+# 重建 "Names window" 窗口中的所有 名称
+#idaapi.rebuild_nlist()
+
+# 获得 "Names window" 已被命名的数量 (变量名、函数名等等)
+#idaapi.get_nlist_size()
+
+# 获得 "Names window" 中从0开始的下标的 名称
+#idaapi.get_nlist_name(index)
+
+# 获得 "Names window" 中从0开始的下标的 EA
+#idaapi.get_nlist_ea(index)
+
+# 自动解析未定义的字节 并将其重新定义为 code 
+#idaapi.auto_make_code(here())
+
+# 自动解析未定义的字节 并将其重新定义为 proc(函数) 包含了 idaapi.auto_make_code
+#idaapi.auto_make_proc(here())
+
+获取当前默认的字符串类型，返回值是一个 STRTYPE_* 的常量
+get_inf_attr(INF_STRTYPE)
+
+# 快捷键 'U'
+idc.MakeUnknown(xFromList[0], 1, DOUNK_SIMPLE | DOUNK_EXPAND | DOUNK_DELNAMES)
+
+ida_bytes.create_strlit(ea, length, strtype)
+  快捷键 'A'；创建一个字符串
+  ea：字符串起始地址
+  length：字符串长度；当值为0时，字符串长度由内核自动计算。
+  strtype的可选值有：
+    idc.STRTYPE_C
+    idc.STRTYPE_PASCAL
+    idc.STRTYPE_LEN2
+    idc.STRTYPE_C_16
+    idc.STRTYPE_LEN4
+    idc.STRTYPE_LEN2_16
+    idc.STRTYPE_LEN4_16
+
+idc.get_strlit_contents(ea, length = -1, strtype = idc.STRTYPE_C)
+  返回字符串的内容
+  ea：字符串起始地址
+  length：字符串长度；为-1时，自动计算字符串长度。
+  strtype：字符串类型；idc.STRTYPE_...的常量值；默认值为STRTYPE_C
+
+# 快捷键 'N'
+idc.MakeName(xref, "_ZTI" + xFromStr)
+
+# 快捷键 '*'
+idc.MakeArray(ea, nitems)
+
+# 从 startEA 到 endEA 开始分析
+#idc.AnalyzeArea(startEA, endEA)
+
+# 自动分析
+#auto_mark_range(start, end, queuetype)
+
+
+get_byte
+get_db_byte
+get_word
+get_dword(here())
+get_qword
+
+ida_bytes.put_byte
+ida_bytes.put_word
+ida_bytes.put_dword(here(), 0x58836C)
+
+patch_dword
