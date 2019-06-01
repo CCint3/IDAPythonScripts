@@ -2,6 +2,7 @@
 
 import re
 import hashlib
+import idautils
 
 
 
