@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-  
 
 import hashlib
+import idautils
 
 def GetBytes(ea, len):
   ret_bytes = []
